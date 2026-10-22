@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suki Mini POS</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #1f2937;
+    --text-muted: #6b7280;
+    --border: #e5e7eb;
+    --border-strong: #d1d5db;
+    --primary: #c2410c;
+    --primary-hover: #9a3412;
+    --danger: #b91c1c;
+    --danger-border: #fca5a5;
+    --danger-hover: #fef2f2;
+    --surface: #f9fafb;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Leelawadee UI", "Sarabun", "Noto Sans Thai", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .page-header {
+    border-bottom: 1px solid var(--border);
+    padding: 20px 16px;
+  }
+
+  .page-header__inner {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .page-header h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .page-header p {
+    margin: 4px 0 0;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  .layout {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .panel {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+
+  .panel__title {
+    margin: 0 0 12px;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  /* ---------- เมนู ---------- */
+  .menu-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .menu-item__name {
+    display: block;
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  .menu-item__price {
+    display: block;
+    color: var(--text-muted);
+    font-size: 15px;
+  }
+
+  /* ---------- ปุ่ม ---------- */
+  .btn {
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1;
+    min-height: 44px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .btn:focus-visible {
+    outline: 3px solid #fdba74;
+    outline-offset: 2px;
+  }
+
+  .btn--add {
+    flex: 0 0 auto;
+    background: var(--primary);
+    color: #ffffff;
+  }
+
+  .btn--add:hover { background: var(--primary-hover); }
+  .btn--add:active { background: var(--primary-hover); }
+
+  .btn--clear {
+    width: 100%;
+    margin-top: 14px;
+    background: var(--bg);
+    color: var(--danger);
+    border-color: var(--danger-border);
+  }
+
+  .btn--clear:hover { background: var(--danger-hover); }
+
+  /* ---------- ตะกร้า ---------- */
+  .cart-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cart-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    gap: 4px 12px;
+    padding: 12px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  .cart-item:last-child { border-bottom: 0; }
+
+  .cart-item__name {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .cart-item__qty {
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  .cart-item__total {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+    font-size: 16px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .cart-empty {
+    margin: 0;
+    padding: 24px 0;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 15px;
+  }
+
+  .cart-empty[hidden] { display: none; }
+
+  .total-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 2px solid var(--text);
+  }
+
+  .total-row__label {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .total-row__value {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .note {
+    margin: 14px 0 0;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+
+  @media (min-width: 760px) {
+    .layout {
+      grid-template-columns: 1.15fr 1fr;
+      align-items: start;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <div class="page-header__inner">
+    <h1>Suki Mini POS</h1>
+    <p>ระบบรับออร์เดอร์หน้าร้านสุกี้</p>
+  </div>
+</header>
+
+<main class="layout">
+  <!-- FR-01: แสดงเมนูพร้อมราคา -->
+  <section class="panel" aria-labelledby="menu-title">
+    <h2 class="panel__title" id="menu-title">เมนู</h2>
+    <ul class="menu-list" id="menu-list"></ul>
+  </section>
+
+  <!-- FR-03 / FR-04 / FR-05: ตะกร้า -->
+  <section class="panel" aria-labelledby="cart-title">
+    <h2 class="panel__title" id="cart-title">ตะกร้า</h2>
+
+    <ul class="cart-list" id="cart-list" aria-live="polite"></ul>
+    <p class="cart-empty" id="cart-empty">ไม่มีสินค้าในตะกร้า</p>
+
+    <div class="total-row">
+      <span class="total-row__label">ยอดรวม</span>
+      <span class="total-row__value" id="total" aria-live="polite">0 บาท</span>
+    </div>
+
+    <button class="btn btn--clear" id="clear-cart" type="button">ล้างตะกร้า</button>
+
+    <p class="note">ข้อมูลตะกร้าไม่ถูกบันทึกถาวร การรีเฟรชหน้าเว็บจะทำให้ตะกร้ากลับเป็นว่าง</p>
+  </section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  // ===== ข้อมูลเมนู (L-03: ราคาคงที่กำหนดไว้ในชุดโค้ด) =====
+  var MENU = [
+    { id: 'M01', name: 'ชุดหมู', price: 199 },
+    { id: 'M02', name: 'ชุดเนื้อ', price: 249 },
+    { id: 'M03', name: 'น้ำดื่ม', price: 20 }
+  ];
+
+  // ===== สถานะตะกร้า (L-02: ไม่บันทึกถาวร) =====
+  var cart = [];
+
+  var menuList = document.getElementById('menu-list');
+  var cartList = document.getElementById('cart-list');
+  var cartEmpty = document.getElementById('cart-empty');
+  var totalEl = document.getElementById('total');
+  var clearBtn = document.getElementById('clear-cart');
+
+  // L-05: แสดงเป็นจำนวนเต็มบาท ไม่มีทศนิยม
+  function formatBaht(amount) {
+    return amount.toLocaleString('th-TH', { maximumFractionDigits: 0 }) + ' บาท';
+  }
+
+  // ===== FR-01: แสดงเมนูพร้อมราคา =====
+  function renderMenu() {
+    MENU.forEach(function (item) {
+      var li = document.createElement('li');
+      li.className = 'menu-item';
+
+      var info = document.createElement('div');
+
+      var name = document.createElement('span');
+      name.className = 'menu-item__name';
+      name.textContent = item.name;
+
+      var price = document.createElement('span');
+      price.className = 'menu-item__price';
+      price.textContent = formatBaht(item.price);
+
+      info.appendChild(name);
+      info.appendChild(price);
+
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn btn--add';
+      btn.textContent = 'เพิ่ม';
+      btn.setAttribute('aria-label', 'เพิ่ม' + item.name + 'ลงตะกร้า');
+      btn.addEventListener('click', function () {
+        addToCart(item.id);
+      });
+
+      li.appendChild(info);
+      li.appendChild(btn);
+      menuList.appendChild(li);
+    });
+  }
+
+  // ===== FR-02: เพิ่มสินค้าเข้าตะกร้า =====
+  function addToCart(id) {
+    var menuItem = MENU.find(function (m) { return m.id === id; });
+    if (!menuItem) { return; }
+
+    var line = cart.find(function (c) { return c.id === id; });
+    if (line) {
+      line.qty += 1;
+    } else {
+      cart.push({ id: menuItem.id, name: menuItem.name, price: menuItem.price, qty: 1 });
+    }
+
+    renderCart();
+  }
+
+  // ===== FR-05: ล้างตะกร้า =====
+  function clearCart() {
+    cart.length = 0;
+    renderCart();
+  }
+
+  // ===== FR-03 / FR-04: แสดงรายการในตะกร้าและยอดรวม =====
+  function renderCart() {
+    cartList.textContent = '';
+
+    cart.forEach(function (line) {
+      var li = document.createElement('li');
+      li.className = 'cart-item';
+
+      var name = document.createElement('span');
+      name.className = 'cart-item__name';
+      name.textContent = line.name;
+
+      var qty = document.createElement('span');
+      qty.className = 'cart-item__qty';
+      qty.textContent = 'จำนวน ' + line.qty;
+
+      var lineTotal = document.createElement('span');
+      lineTotal.className = 'cart-item__total';
+      lineTotal.textContent = formatBaht(line.price * line.qty);
+
+      li.appendChild(name);
+      li.appendChild(qty);
+      li.appendChild(lineTotal);
+      cartList.appendChild(li);
+    });
+
+    // ตะกร้าว่าง → แสดงข้อความ "ไม่มีสินค้าในตะกร้า"
+    cartEmpty.hidden = cart.length > 0;
+
+    // ยอดรวม = ผลบวกของ (ราคาต่อหน่วย × จำนวน) ของทุกรายการ
+    var total = cart.reduce(function (sum, line) {
+      return sum + (line.price * line.qty);
+    }, 0);
+
+    totalEl.textContent = formatBaht(total);
+  }
+
+  clearBtn.addEventListener('click', clearCart);
+
+  renderMenu();
+  renderCart();
+})();
+</script>
+
+</body>
+</html>
